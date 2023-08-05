@@ -1,17 +1,19 @@
 const express = require('express');
 const app = express();
-const cors = require('cors');
+// const cors = require('cors');
+const cors = require('cors')
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
 const stripe = require('stripe')(process.env.SECRET_key)
 const port = process.env.PORT || 5000;
 // all done
 // middleware
+// app.use(cors())
 app.use(cors())
 app.use(express.json())
 const veryfyJWT = (req,res,next) =>{
   const authorization = req.headers.authorization;
-  
+  console.log(authorization);
   if (!authorization) {
     return res.status(403).send({err: true, mesage: 'unauthorized'})
   }
@@ -138,11 +140,11 @@ const body = req.body;
 const id = req.params.id;
 const quary = {_id : new ObjectId(id)}
 const filter = await selectedClassCollection.findOne(quary)
-// console.log(filter);
-// if (filter) {
-//   // return res.send({message : 'allready hear'})
-//   console.log(filter);
-// }
+console.log(filter);
+if (filter) {
+  return res.send({message : 'allready hear'})
+  // todo
+}
 
 const result = await selectedClassCollection.insertOne(body)
 res.send(result)
@@ -170,9 +172,24 @@ app.delete('/myclasses/:id',async(req,res) =>{
   res.send(result)
 })
 // All users rout 
-app.post('/all-user',veryfyJWT,async(req,res) =>{
+// app.post('/user',veryfyJWT,async(req,res) =>{
+//   const body = req.body;
+//   console.log(body);
+  // const quary= {email : body.email}
+  // const isabilavle = await allUserCollection.findOne(quary)
+  
+  // if (isabilavle) {
+  //   return res.send({message : 'already'})
+  // }
+  // const result = await allUserCollection.insertOne(body)
+  // res.send(result)
+// })
+
+app.post('/user/:id',async(req,res)=>{
+  const email = req.params.id;
   const body = req.body;
-  const quary= {email : body.email}
+  
+   const quary= {email : email}
   const isabilavle = await allUserCollection.findOne(quary)
   
   if (isabilavle) {
@@ -180,7 +197,10 @@ app.post('/all-user',veryfyJWT,async(req,res) =>{
   }
   const result = await allUserCollection.insertOne(body)
   res.send(result)
+  
 })
+
+
 app.get('/all-user',veryfyJWT,verifyAdmin,async(req,res) =>{
   const result = await allUserCollection.find().toArray()
   res.send(result)
@@ -222,13 +242,26 @@ app.get('/user/user/:email', veryfyJWT,async(req,res) =>{
   const result = {users : user?.role == "user"}
   res.send(result)
 })
-app.get('/user/instractor/:email', veryfyJWT,async(req,res) =>{
+// app.get('/user/instractor/:email', veryfyJWT,async(req,res) =>{
+//   const email =  req.params.email
+//   const quary = {email : email};
+
+  // if (req.decoded.email !== email) {
+  //   return res.send({instractor : false})
+  // }
+  // const user = await allUserCollection.findOne(quary);
+  // const result = {instractor : user?.role == "instractor"}
+  // res.send(result)
+// })
+
+app.get('/user/instructors/:email', veryfyJWT,async(req,res) =>{
   const email =  req.params.email
   const quary = {email : email};
-
+  
   if (req.decoded.email !== email) {
     return res.send({instractor : false})
   }
+ 
   const user = await allUserCollection.findOne(quary);
   const result = {instractor : user?.role == "instractor"}
   res.send(result)
